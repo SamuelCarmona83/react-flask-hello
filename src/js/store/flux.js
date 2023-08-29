@@ -24,7 +24,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getMessage: async () => {
 				try {
 					// fetching data from the backend
-					const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/hello")
+					const apiUrl = import.meta.env.VITE_BACKEND_URL
+					console.log(apiUrl)
+					const resp = await fetch(apiUrl + "/api/hello")
 					const data = await resp.json()
 					setStore({ message: data.message })
 					// don't forget to return something, that is how the async resolves
