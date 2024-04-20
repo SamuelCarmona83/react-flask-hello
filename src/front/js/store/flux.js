@@ -1,6 +1,7 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
+			token: null || localStorage.getItem("token"),
 			message: null,
 			demo: [
 				{
@@ -13,7 +14,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			profile: null,
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -46,6 +48,42 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
+			},
+			login: async (user) => {
+				const resp = await fetch(process.env.BACKEND_URL + "/api/login", {
+					method: "POST", // *GET, POST, PUT, DELETE, etc.
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify(user),
+				})
+				const data = await resp.json()
+				if(resp.ok){
+					localStorage.setItem("token", data.access_token)
+					setStore({ token: data.access_token })
+					return true
+				}
+				else{
+					return false
+				}
+			},
+			getProfile: async (user) => {
+				const store = getStore()
+				const resp = await fetch(process.env.BACKEND_URL + "/api/protected", {
+					method: "GET", // *GET, POST, PUT, DELETE, etc.
+					headers: {
+					  "Content-Type": "application/json",
+					  "Authorization": "Bearer " + store.token
+					},
+				})
+				const data = await resp.json()
+				if(resp.ok){
+					setStore({ profile: data })
+				}
+			},
+			logout: () => {
+				setStore({ profile: null, token: null })
+				localStorage.removeItem("token")
 			}
 		}
 	};
